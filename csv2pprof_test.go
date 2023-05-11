@@ -72,6 +72,30 @@ func TestUnits(t *testing.T) {
 				},
 			},
 		},
+		{
+			// Stack at the end
+			input: "time/seconds,stack\n1,foo;bar",
+			want: []*profile.ValueType{
+				{
+					Type: "time",
+					Unit: "seconds",
+				},
+			},
+		},
+		{
+			// Stack in the middle
+			input: "time/seconds,stack,age/years\n1,foo;bar,18",
+			want: []*profile.ValueType{
+				{
+					Type: "time",
+					Unit: "seconds",
+				},
+				{
+					Type: "age",
+					Unit: "years",
+				},
+			},
+		},
 	}
 
 	for i, c := range tests {
@@ -96,9 +120,24 @@ func TestSamples(t *testing.T) {
 
 	tests := []test{
 		{
+			// Stack at the start
 			input: "stack,samples/count\nfoo;bar,1",
 			want: []*profile.Sample{
 				{Value: []int64{1}},
+			},
+		},
+		{
+			// Stack at the end
+			input: "samples/count,stack\n1,foo;bar",
+			want: []*profile.Sample{
+				{Value: []int64{1}},
+			},
+		},
+		{
+			// Stack in the middle end
+			input: "samples/count,stack,age/years\n1,foo;bar,18",
+			want: []*profile.Sample{
+				{Value: []int64{1, 18}},
 			},
 		},
 		{
