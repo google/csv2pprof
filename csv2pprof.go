@@ -116,7 +116,6 @@ func ConvertCSVToPprof(in io.Reader) (*profile.Profile, error) {
 			if len(p.SampleType) == 0 {
 				return nil, fmt.Errorf("expected columns with weights in CSV header row, got %q", record)
 			}
-			// TODO: Add handling for if there are no other headers?
 			continue
 		}
 
@@ -124,8 +123,7 @@ func ConvertCSVToPprof(in io.Reader) (*profile.Profile, error) {
 		sample := profile.Sample{}
 		for col, value := range record {
 			if col == stackCol {
-				semicolonSeparatedFrames := record[0]
-				frames := strings.Split(semicolonSeparatedFrames, ";")
+				frames := strings.Split(value, ";")
 				for i := range frames {
 					// The leaf has to be first. So reverse the line.
 					// https://github.com/google/pprof/blob/eeec1cb781c311df467fabdc8c384fa52e91bc65/proto/profile.proto#LL110C26-L110C26
