@@ -94,27 +94,9 @@ func ConvertCSVToPprof(in io.Reader) (*profile.Profile, error) {
 
 		if i == 0 {
 			// read headers
-			for col, header := range record {
-				if header == "stack" {
-					stackCol = col
-					continue
-				}
-				valueType := profile.ValueType{}
-				if strings.Contains(header, "/") {
-					slash := strings.LastIndex(header, "/")
-					valueType.Type = header[:slash]
-					valueType.Unit = header[slash+1:]
-				} else {
-					valueType.Type = header
-					valueType.Unit = "count"
-				}
-				p.SampleType = append(p.SampleType, &valueType)
-			}
-			if stackCol == -1 {
-				return nil, fmt.Errorf("expected \"stack\" in CSV header row, got: %q", record)
-			}
-			if len(p.SampleType) == 0 {
-				return nil, fmt.Errorf("expected columns with weights in CSV header row, got %q", record)
+			p.SampleType, stackCol, err = readHeaders(record)
+			if err != nil {
+				return nil, err
 			}
 			continue
 		}
@@ -144,4 +126,31 @@ func ConvertCSVToPprof(in io.Reader) (*profile.Profile, error) {
 		p.Sample = append(p.Sample, &sample)
 	}
 	return p, nil
+}
+
+func readHeaders(headers []string) (sampleTypes []*profile.ValueType, stackCol int, err error) {
+	stackCol = -1
+	for col, header := range headers {
+		if header == "stack" {
+			stackCol = col
+			continue
+		}
+		valueType := profile.ValueType{}
+		if strings.Contains(header, "/") {
+			slash := strings.LastIndex(header, "/")
+			valueType.Type = header[:slash]
+			valueType.Unit = header[slash+1:]
+		} else {
+			valueType.Type = header
+			valueType.Unit = "count"
+		}
+		sampleTypes = append(sampleTypes, &valueType)
+	}
+	if stackCol == -1 {
+		return nil, 0, fmt.Errorf("expected \"stack\" in CSV header row, got: %q", headers)
+	}
+	if len(sampleTypes) == 0 {
+		return nil, 0, fmt.Errorf("expected columns with weights in CSV header row, got %q", headers)
+	}
+	return sampleTypes, stackCol, nil
 }
