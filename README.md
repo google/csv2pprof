@@ -41,3 +41,11 @@ CSVs must have:
 - a header row
 - a semicolon-delimited `stack` column
 - one or more measurement columns
+
+
+## See Also / Prior Art
+
+- [Brendan Gregg's Folded Stacks Format](https://github.com/brendangregg/FlameGraph) uses semicolon-separated stacks, and a space-separated measurement.
+- [felixge's pprofutils](https://github.com/felixge/pprofutils) converts folded stack format to pprof.
+
+The folded stack format is just a little harder to generate from databases and spreadsheets.
