@@ -3,6 +3,18 @@ Converts CSV to [pprof](https://github.com/google/pprof) profile format.
 Use when you have some data in a database or a spreadsheet you'd like to turn
 into a pprof profile.
 
+## Installation
+
+```
+go install github.com/mhansen/csv2pprof@latest
+```
+
+## Usage
+
+```
+csv2pprof < input.csv > output.pprof
+```
+
 Generate a stack column of semicolon-separated frame names, similar to Brendan
 Gregg's "Folded Stacks" format, and an integer measurement column.
 
