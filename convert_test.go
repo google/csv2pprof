@@ -1,4 +1,4 @@
-package csv2pprof
+package main
 
 import (
 	"strings"
