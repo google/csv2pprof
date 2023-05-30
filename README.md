@@ -1,7 +1,7 @@
 Converts CSV to [pprof](https://github.com/google/pprof) profile format.
 
-Use when you have some data in a database or a spreadsheet you'd like to turn
-into a pprof profile.
+Use csv2pprof when you have some data in a database or a spreadsheet you'd like
+to turn into a pprof profile.
 
 ## Installation
 
@@ -12,11 +12,15 @@ go install github.com/google/csv2pprof@latest
 ## Usage
 
 ```
-csv2pprof < input.csv > output.pprof
+csv2pprof < input.csv > output.pprof.gz
 ```
 
-Generate a stack column of semicolon-separated frame names, similar to Brendan
-Gregg's "Folded Stacks" format, and an integer measurement column.
+Input CSVs must have:
+- a header row
+- a semicolon-delimited `stack` column (similar to Brendan Gregg's Folded Stacks
+  format)
+- one or more integer measurement columns (e.g. samples, or time). Measurements
+  can have units given after a forward-slash `/`.
 
 Example CSV input:
 
@@ -27,8 +31,7 @@ main;foo;bar,2000
 main;baz,4000
 ```
 
-Or you can have many measurement columns. Give units after the forward-slash
-`/`:
+Or you can have many measurement columns.
 
 ```
 stack,cpu-time/milliseconds,samples,instructions
@@ -36,11 +39,6 @@ main;foo,1000,10,100
 main;foo;bar,2000,20,200
 main;baz,4000,40,400
 ```
-
-CSVs must have:
-- a header row
-- a semicolon-delimited `stack` column
-- one or more measurement columns
 
 
 ## See Also / Prior Art
