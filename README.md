@@ -25,19 +25,19 @@ Input CSVs must have:
 Example CSV input:
 
 ```
-stack,cpu-time/milliseconds
-main;foo,1000
-main;foo;bar,2000
-main;baz,4000
+cpu-time/milliseconds,stack
+1000,main;foo
+2000,main;foo;bar
+4000,main;baz
 ```
 
-Or you can have many measurement columns.
+Or you can have many measurement columns:
 
 ```
-stack,cpu-time/milliseconds,samples,instructions
-main;foo,1000,10,100
-main;foo;bar,2000,20,200
-main;baz,4000,40,400
+cpu-time/milliseconds,samples,instructions,stack
+1000,10,100,main;foo
+2000,20,200,main;foo;bar
+4000,40,400,main;baz
 ```
 
 
