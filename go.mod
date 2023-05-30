@@ -1,4 +1,4 @@
-module github.com/mhansen/csv2pprof
+module github.com/google/csv2pprof
 
 go 1.19
 

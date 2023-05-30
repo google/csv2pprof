@@ -6,7 +6,7 @@ into a pprof profile.
 ## Installation
 
 ```
-go install github.com/mhansen/csv2pprof@latest
+go install github.com/google/csv2pprof@latest
 ```
 
 ## Usage
