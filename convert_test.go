@@ -37,14 +37,17 @@ func TestComments(t *testing.T) {
 
 func TestUnits(t *testing.T) {
 	type test struct {
-		input string
+		input []string
 		want  []*profile.ValueType
 	}
 
 	tests := []test{
 		{
 			// Two units fully specified
-			input: "stack,samples/count,time/ms\nfoo;bar,1,1000",
+			input: []string{
+				"stack,samples/count,time/ms",
+				"foo;bar,1,1000",
+			},
 			want: []*profile.ValueType{
 				{
 					Type: "samples",
@@ -58,7 +61,10 @@ func TestUnits(t *testing.T) {
 		},
 		{
 			// One unit fully specified
-			input: "stack,time/ms\nfoo;bar,1",
+			input: []string{
+				"stack,time/ms",
+				"foo;bar,1",
+			},
 			want: []*profile.ValueType{
 				{
 					Type: "time",
@@ -68,7 +74,10 @@ func TestUnits(t *testing.T) {
 		},
 		{
 			// No units given, default to 'count'
-			input: "stack,samples\nfoo;bar,1",
+			input: []string{
+				"stack,samples",
+				"foo;bar,1",
+			},
 			want: []*profile.ValueType{
 				{
 					Type: "samples",
@@ -78,7 +87,10 @@ func TestUnits(t *testing.T) {
 		},
 		{
 			// If multiple possible units, choose the last one.
-			input: "stack,samples/unit1/unit2\nfoo;bar,1",
+			input: []string{
+				"stack,samples/unit1/unit2",
+				"foo;bar,1",
+			},
 			want: []*profile.ValueType{
 				{
 					Type: "samples/unit1",
@@ -88,7 +100,10 @@ func TestUnits(t *testing.T) {
 		},
 		{
 			// Stack at the end
-			input: "time/seconds,stack\n1,foo;bar",
+			input: []string{
+				"time/seconds,stack",
+				"1,foo;bar",
+			},
 			want: []*profile.ValueType{
 				{
 					Type: "time",
@@ -98,7 +113,10 @@ func TestUnits(t *testing.T) {
 		},
 		{
 			// Stack in the middle
-			input: "time/seconds,stack,age/years\n1,foo;bar,18",
+			input: []string{
+				"time/seconds,stack,age/years",
+				"1,foo;bar,18",
+			},
 			want: []*profile.ValueType{
 				{
 					Type: "time",
@@ -113,7 +131,7 @@ func TestUnits(t *testing.T) {
 	}
 
 	for i, c := range tests {
-		p, err := ConvertCSVToPprof(strings.NewReader(c.input))
+		p, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")))
 		if err != nil {
 			t.Fatalf("got error: %v", err)
 		}
@@ -128,40 +146,56 @@ func TestUnits(t *testing.T) {
 
 func TestSamples(t *testing.T) {
 	type test struct {
-		input string
+		input []string
 		want  []*profile.Sample
 	}
 
 	tests := []test{
 		{
 			// Stack at the start
-			input: "stack,samples/count\nfoo;bar,1",
+			input: []string{
+				"stack,samples/count",
+				"foo;bar,1",
+			},
 			want: []*profile.Sample{
 				{Value: []int64{1}},
 			},
 		},
 		{
 			// Stack at the end
-			input: "samples/count,stack\n1,foo;bar",
+			input: []string{
+				"samples/count,stack",
+				"1,foo;bar",
+			},
 			want: []*profile.Sample{
 				{Value: []int64{1}},
 			},
 		},
 		{
 			// Stack in the middle end
-			input: "samples/count,stack,age/years\n1,foo;bar,18",
+			input: []string{
+				"samples/count,stack,age/years",
+				"1,foo;bar,18",
+			},
 			want: []*profile.Sample{
 				{Value: []int64{1, 18}},
 			},
 		},
 		{
-			input: "stack,samples/count,time/ms\nfoo;bar,1,1000",
+			input: []string{
+				"stack,samples/count,time/ms",
+				"foo;bar,1,1000",
+			},
 			want: []*profile.Sample{
 				{Value: []int64{1, 1000}},
 			},
 		},
 		{
-			input: "stack,samples/count,time/ms\nfoo;bar,1,1000\nfoo,2,2000",
+			input: []string{
+				"stack,samples/count,time/ms",
+				"foo;bar,1,1000",
+				"foo,2,2000",
+			},
 			want: []*profile.Sample{
 				{Value: []int64{1, 1000}},
 				{Value: []int64{2, 2000}},
@@ -170,7 +204,7 @@ func TestSamples(t *testing.T) {
 	}
 
 	for _, c := range tests {
-		p, err := ConvertCSVToPprof(strings.NewReader(c.input))
+		p, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")))
 		if err != nil {
 			t.Fatalf("got error: %v", err)
 		}
@@ -192,30 +226,42 @@ func TestSamples(t *testing.T) {
 
 func TestErrors(t *testing.T) {
 	type test struct {
-		input   string
+		input   []string
 		wantErr string
 	}
 
 	tests := []test{
 		{
-			input:   "samples/count\n1",
+			input: []string{
+				"samples/count",
+				"1",
+			},
 			wantErr: "expected \"stack\" in CSV header row, got: [\"samples/count\"]",
 		},
 		{
-			input:   "stack\nfoo;bar",
+			input: []string{
+				"stack",
+				"foo;bar",
+			},
 			wantErr: "expected columns with weights in CSV header row, got [\"stack\"]",
 		},
 		{
-			input:   "stack,weight\nfoo;bar",
+			input: []string{
+				"stack,weight",
+				"foo;bar",
+			},
 			wantErr: "error reading CSV: record on line 2: wrong number of fields",
 		},
 		{
-			input:   "stack,weight\nfoo;bar,not-a-number",
+			input: []string{
+				"stack,weight",
+				"foo;bar,not-a-number",
+			},
 			wantErr: "on line 2, couldn't parse number: strconv.ParseInt: parsing \"not-a-number\": invalid syntax",
 		},
 	}
 	for i, c := range tests {
-		_, err := ConvertCSVToPprof(strings.NewReader(c.input))
+		_, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")))
 		if err == nil {
 			t.Errorf("test %v, wanted error %q, got error nil", i, c.wantErr)
 			continue
