@@ -17,16 +17,32 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 )
 
+func openInput() io.Reader {
+	args := flag.Args()
+	if len(args) == 0 {
+		return os.Stdin
+	}
+	in, err := os.Open(args[0])
+	if err != nil {
+		log.Fatal(err)
+	}
+	return in
+}
+
 func main() {
 	flag.Usage = func() {
-		fmt.Fprint(os.Stderr, "Usage: csv2pprof < input.csv > output.pprof.gz")
+		fmt.Fprint(os.Stderr, "Usage:\n")
+		fmt.Fprint(os.Stderr, "$ csv2pprof < input.csv > output.pprof.gz\n")
+		fmt.Fprint(os.Stderr, "$ csv2pprof input.csv > output.pprof.gz\n")
 	}
 	flag.Parse()
-	err := ConvertCSVToCompressedPprof(os.Stdin, os.Stdout)
+	in := openInput()
+	err := ConvertCSVToCompressedPprof(in, os.Stdout)
 	if err != nil {
 		log.Fatal(err)
 	}
