@@ -15,11 +15,17 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 )
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprint(os.Stderr, "Usage: csv2pprof < input.csv > output.pprof.gz")
+	}
+	flag.Parse()
 	err := ConvertCSVToCompressedPprof(os.Stdin, os.Stdout)
 	if err != nil {
 		log.Fatal(err)
