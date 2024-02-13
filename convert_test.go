@@ -24,7 +24,7 @@ import (
 )
 
 func TestComments(t *testing.T) {
-	p, err := ConvertCSVToPprof(strings.NewReader("stack,samples/count,time/ms\nfoo;bar,1,1000"))
+	p, err := ConvertCSVToPprof(strings.NewReader("stack,samples/count,time/ms\nfoo;bar,1,1000"), ";")
 	if err != nil {
 		t.Fatalf("got error: %v", err)
 	}
@@ -131,7 +131,7 @@ func TestUnits(t *testing.T) {
 	}
 
 	for i, c := range tests {
-		p, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")))
+		p, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")), ";")
 		if err != nil {
 			t.Fatalf("got error: %v", err)
 		}
@@ -146,8 +146,9 @@ func TestUnits(t *testing.T) {
 
 func TestSamples(t *testing.T) {
 	type test struct {
-		input []string
-		want  []*profile.Sample
+		input    []string
+		stackSep string
+		want     []*profile.Sample
 	}
 
 	tests := []test{
@@ -157,6 +158,7 @@ func TestSamples(t *testing.T) {
 				"stack,samples/count",
 				"foo;bar,1",
 			},
+			stackSep: ";",
 			want: []*profile.Sample{
 				{Value: []int64{1}},
 			},
@@ -167,6 +169,7 @@ func TestSamples(t *testing.T) {
 				"samples/count,stack",
 				"1,foo;bar",
 			},
+			stackSep: ";",
 			want: []*profile.Sample{
 				{Value: []int64{1}},
 			},
@@ -177,6 +180,7 @@ func TestSamples(t *testing.T) {
 				"samples/count,stack,age/years",
 				"1,foo;bar,18",
 			},
+			stackSep: ";",
 			want: []*profile.Sample{
 				{Value: []int64{1, 18}},
 			},
@@ -186,6 +190,7 @@ func TestSamples(t *testing.T) {
 				"stack,samples/count,time/ms",
 				"foo;bar,1,1000",
 			},
+			stackSep: ";",
 			want: []*profile.Sample{
 				{Value: []int64{1, 1000}},
 			},
@@ -196,15 +201,27 @@ func TestSamples(t *testing.T) {
 				"foo;bar,1,1000",
 				"foo,2,2000",
 			},
+			stackSep: ";",
 			want: []*profile.Sample{
 				{Value: []int64{1, 1000}},
 				{Value: []int64{2, 2000}},
 			},
 		},
+		{
+			// Stack at the start
+			input: []string{
+				"stack,samples/count",
+				"\"foo\nbar\",1",
+			},
+			stackSep: "\n",
+			want: []*profile.Sample{
+				{Value: []int64{1}},
+			},
+		},
 	}
 
 	for _, c := range tests {
-		p, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")))
+		p, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")), c.stackSep)
 		if err != nil {
 			t.Fatalf("got error: %v", err)
 		}
@@ -261,7 +278,7 @@ func TestErrors(t *testing.T) {
 		},
 	}
 	for i, c := range tests {
-		_, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")))
+		_, err := ConvertCSVToPprof(strings.NewReader(strings.Join(c.input, "\n")), ";")
 		if err == nil {
 			t.Errorf("test %v, wanted error %q, got error nil", i, c.wantErr)
 			continue

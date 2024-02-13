@@ -40,6 +40,13 @@ cpu-time/milliseconds,samples,instructions,stack
 4000,40,400,main;baz
 ```
 
+If you want to use a different separator for the stack than semicolon, use
+`--stacksep`:
+
+```
+$ csv2pprof --stacksep="\n" < input.csv > pprof.pb.gz
+```
+
 
 ## See Also / Prior Art
 

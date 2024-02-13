@@ -22,6 +22,10 @@ import (
 	"os"
 )
 
+var (
+	stackSep = flag.String("stacksep", ";", "Character to split the 'stack' column into lines with")
+)
+
 func openInput() io.Reader {
 	args := flag.Args()
 	if len(args) == 0 {
@@ -37,12 +41,15 @@ func openInput() io.Reader {
 func main() {
 	flag.Usage = func() {
 		fmt.Fprint(os.Stderr, "Usage:\n")
-		fmt.Fprint(os.Stderr, "$ csv2pprof < input.csv > output.pprof.gz\n")
-		fmt.Fprint(os.Stderr, "$ csv2pprof input.csv > output.pprof.gz\n")
+		fmt.Fprint(os.Stderr, "csv2pprof < input.csv > output.pprof.gz\n")
+		fmt.Fprint(os.Stderr, "csv2pprof input.csv > output.pprof.gz\n")
+		fmt.Fprint(os.Stderr, "\n")
+		fmt.Fprint(os.Stderr, "Parameters:\n")
+		flag.PrintDefaults()
 	}
 	flag.Parse()
 	in := openInput()
-	err := ConvertCSVToCompressedPprof(in, os.Stdout)
+	err := ConvertCSVToCompressedPprof(in, os.Stdout, *stackSep)
 	if err != nil {
 		log.Fatal(err)
 	}

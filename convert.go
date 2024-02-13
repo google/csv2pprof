@@ -25,8 +25,8 @@ import (
 )
 
 // Convert CSV from in, to gzip-compressed pprof wire format on out.
-func ConvertCSVToCompressedPprof(in io.Reader, out io.Writer) error {
-	p, err := ConvertCSVToPprof(in)
+func ConvertCSVToCompressedPprof(in io.Reader, out io.Writer, stackSep string) error {
+	p, err := ConvertCSVToPprof(in, stackSep)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (b *pprofBuilder) location(frame string) *profile.Location {
 	return location
 }
 
-func ConvertCSVToPprof(in io.Reader) (*profile.Profile, error) {
+func ConvertCSVToPprof(in io.Reader, stackSep string) (*profile.Profile, error) {
 	r := csv.NewReader(in)
 	p := &profile.Profile{}
 	stackCol := -1
@@ -119,7 +119,7 @@ func ConvertCSVToPprof(in io.Reader) (*profile.Profile, error) {
 		sample := profile.Sample{}
 		for col, value := range record {
 			if col == stackCol {
-				frames := strings.Split(value, ";")
+				frames := strings.Split(value, stackSep)
 				for i := range frames {
 					// The leaf has to be first. So reverse the line.
 					// https://github.com/google/pprof/blob/eeec1cb781c311df467fabdc8c384fa52e91bc65/proto/profile.proto#LL110C26-L110C26
